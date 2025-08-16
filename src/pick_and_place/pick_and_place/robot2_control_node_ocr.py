@@ -6,9 +6,16 @@ from pymycobot.mycobot280 import MyCobot280
 from pick_and_place.base_coordinate_transform import transform_target_pose_camera_to_base
 from pick_and_place.image_capture import CameraManager  # CameraManager 클래스 가져오기
 from pick_and_place.image_detection import detect_target  # detect() 내부에서 _detect_april_tag 호출
+
 from robocallee_fms.srv import RobotArmRequest
 
 ## Note: pick, place 각각 따로 모듈화하기(분리시켜 놓기)
+
+
+################ CJ modified
+from pick_and_place.image_detection_ocr import detect_target_ocr  #  호출
+shoe_info = {'model': 'None', 'color': 'None', 'size': -1}
+################ CJ modified
 
 class Robot2ControlNode(Node):
     def __init__(self):
@@ -42,9 +49,26 @@ class Robot2ControlNode(Node):
         self.get_logger().info(f'[서비스 요청] action: {action}, shelf_num: {shelf_num}, pinky_num: {pinky_id}')
 
         if action == 'buffer_to_pinky':
-            success, msg = self.handle_buffer_to_pinky(pinky_id)
+            success, msg, = self.handle_buffer_to_pinky(pinky_id)
         elif action == 'pinky_to_buffer':
             success, msg = self.handle_pinky_to_buffer(pinky_id)
+############################### CJ modified
+
+
+            ## Note: OCR 인식 후 얻은 데이터 저장
+            response.robot_id = 2
+            response.amr_id = pinky_id
+            response.action = msg
+            response.model = shoe_info['model']
+            response.size = shoe_info['size']
+            response.color = shoe_info['color']
+            response.success = success
+            return response
+
+
+##############################333 CJ modified
+
+
         else:
             success, msg = False, f"지원하지 않는 action: {action}"
 
@@ -213,6 +237,7 @@ class Robot2ControlNode(Node):
     RobotArm2가 pinky에서 buffer로 물건을 옮기는 함수
     '''
     def handle_pinky_to_buffer(self, pinky_id):
+
         # TODO: 실제 로봇 로직 작성
         
         # 핑키 바라보는 위치로 이동
@@ -224,10 +249,27 @@ class Robot2ControlNode(Node):
         print("그리퍼를 완전히 엽니다.")
         self.mc.set_gripper_value(100, 50)
         
-        # 프레임 가져오고, 프레임에서 에이프릴테그 감지
-        print("\n[2] :brain: AprilTag 인식 중...")
+############################## CJ modified
+
+        global shoe_info
+
+        # 프레임 가져오고, 프레임에서 OCR 감지
+        print("\n[2] :brain: OCR 인식 중...")
         frame = self.camera.get_frame()
-        camera_coords, rvec_deg, tag_id = detect_target(frame, target_id=id) # 타겟 id 설정 3 >> id
+        camera_coords, rvec_deg, cur_model, cur_color, cur_size = detect_target_ocr(frame) # 타겟 id 설정 3 >> id
+
+        shoe_info['model'] = cur_model
+        shoe_info['color'] = cur_color
+        shoe_info['size'] = cur_size
+
+################################3 CJ modified
+
+
+        # 프레임 가져오고, 프레임에서 에이프릴테그 감지
+        # print("\n[2] :brain: AprilTag 인식 중...")
+        # frame = self.camera.get_frame()
+        # camera_coords, rvec_deg, tag_id = detect_target(frame, target_id=id) # 타겟 id 설정 3 >> id
+
 
         if camera_coords is not None and rvec_deg is not None:
             print("\n=== April Tag 좌표 정보 ===")
