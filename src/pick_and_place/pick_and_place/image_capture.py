@@ -3,8 +3,13 @@ import threading
 import time
 from flask import Flask, Response
 
+
+device_num = 0
+# device_num = '/dev/jetcocam0'
+
+
 class CameraManager:
-    def __init__(self, device='/dev/jetcocam0', enable_streaming=True, flask_port=5000):
+    def __init__(self, device=device_num, enable_streaming=True, flask_port=5000):
         self.cap = cv2.VideoCapture(device)
         if not self.cap.isOpened():
             raise RuntimeError(f"카메라를 열 수 없습니다: {device}")
