@@ -15,7 +15,7 @@ from pick_and_place.http_request import ask_django_ocr  # detect() 내부에서 
 django_url = 'https://robocallee.jp.ngrok.io/gwanje/ocr_from_flask_stream/'
 
 
-
+ 
 # === 카메라 내부 파라미터 설정 ===
 camera_matrix = np.array([[1018.8890899848071, 0., 372.64373648977255],
                           [0., 1016.7247236426332, 229.30521863962326],

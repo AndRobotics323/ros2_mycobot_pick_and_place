@@ -35,7 +35,7 @@ def classify_color(bgr):
         if all(lower[i] <= hsv[i] <= upper[i] for i in range(3)):
             return color
     return 'unknown'
-
+ 
 
 def get_dominant_color(img, pts):
     # pts: [(x1, y1), (x2, y2), (x3, y3), (x4, y4)] (시계방향)

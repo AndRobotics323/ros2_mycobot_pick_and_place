@@ -53,7 +53,7 @@ class Robot2ControlNode(Node):
         elif action == 'pinky_to_buffer':
             success, msg = self.handle_pinky_to_buffer(pinky_id)
 ############################### CJ modified
-
+ 
 
             ## Note: OCR 인식 후 얻은 데이터 저장
             response.robot_id = 2

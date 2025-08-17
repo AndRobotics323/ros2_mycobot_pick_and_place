@@ -30,7 +30,7 @@ def compare_two(mode):
             frame = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
             break
 
-
+ 
     if mode == 'ocr':
 
         camera_coords, rvec_deg, cur_model, cur_color, cur_size = detect_target_ocr(frame) # 타겟 id 설정 3 >> id
