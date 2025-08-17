@@ -5,8 +5,9 @@ import sys
 import cv2
 import numpy as np
 
-from pick_and_place.http_request import ask_django_ocr  # detect() 내부에서 _detect_april_tag 호출
+# from pick_and_place.http_request import ask_django_ocr  # detect() 내부에서 _detect_april_tag 호출
 
+from http_request import ask_django_ocr  # detect() 내부에서 _detect_april_tag 호출
 
 
 # CJ 192.168.0.189
@@ -21,7 +22,7 @@ camera_matrix = np.array([[1018.8890899848071, 0., 372.64373648977255],
                           [0., 1016.7247236426332, 229.30521863962326],
                           [0., 0., 1.]], dtype=np.float32)
 dist_coeffs = np.array([-0.4664, 2.0392, 0.00035, -0.00077, -16.977], dtype=np.float64)
-tag_size = 0.02  # 단위: meter
+tag_size = 0.04  # 단위: meter
 
 
 
@@ -39,33 +40,45 @@ def estimate_label_pose(bbox, K, dist):
     if not success:
         return None, None
 
-    camera_coords = (tvec.flatten() * 1000).tolist()  # mm 단위 변환
+    # camera_coords = (tvec.flatten() * 1000 ).tolist()  # mm 단위 변환
+    camera_coords = (tvec.flatten() * 1000 ).tolist()  # mm 단위 변환
+
     rvec_deg = (np.rad2deg(rvec.flatten())).tolist()
     return camera_coords, rvec_deg
-
 
 
 
 # camera_coords, rvec_deg, cur_model, cur_color, cur_size = detect_target_ocr(frame) # 타겟 id 설정 3 >> id
 def _detect_ocr(frame, camera_matrix):
   
-
-# tmp_dict = { 'model': '아직', 'color' : 'yet', 'size': -1, 'coords': [0,0,0,0]  }
+    # tmp_dict = { 'model': '아직', 'color' : 'yet', 'size': -1, 'coords': [0,0,0,0]  }
     tmp_dict = ask_django_ocr(django_url, 'get_shoe_info')
 
     four_points = tmp_dict['coords']
+
     camera_coords, rvec_deg = estimate_label_pose(four_points, camera_matrix, dist_coeffs)
 
 
 # Pose 계산 후 터미널 출력
     if camera_coords is not None:
+        camera_coords = [x * 10 for x in camera_coords]
+
+
         found = True
         roll, pitch, yaw = rvec_deg
         print(f"    좌표: X={camera_coords[0]:.1f}mm, Y={camera_coords[1]:.1f}mm, Z={camera_coords[2]:.1f}mm")
-        print(f"    방향: Roll={roll:.1f}°, Pitch={pitch:.1f}°, Yaw={yaw:.1f}°")
+        # print(f"    방향: Roll={roll:.1f}°, Pitch={pitch:.1f}°, Yaw={yaw:.1f}°")
         
 
     return camera_coords, rvec_deg, tmp_dict['model'], tmp_dict['color'], tmp_dict['size']
+
+
+
+
+
+
+
+
 
 
 

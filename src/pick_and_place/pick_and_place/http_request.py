@@ -35,7 +35,7 @@ def classify_color(bgr):
         if all(lower[i] <= hsv[i] <= upper[i] for i in range(3)):
             return color
     return 'unknown'
- 
+
 
 def get_dominant_color(img, pts):
     # pts: [(x1, y1), (x2, y2), (x3, y3), (x4, y4)] (시계방향)
@@ -51,6 +51,17 @@ def get_dominant_color(img, pts):
     most_common = Counter(pixels).most_common(1)[0][0]
     return most_common  # (B, G, R)
 
+    # mask = np.zeros(img.shape[:2], dtype=np.uint8)
+
+    # # 좌표들을 numpy array로 강제 변환 (x,y 정수쌍)
+    # pts = np.array([tuple(map(int, p)) for p in pts], dtype=np.int32)
+    # pts = pts.reshape((-1, 1, 2))  # (N,1,2) 형태로 변환
+
+    # cv2.fillPoly(mask, [pts], 255)
+
+    # mean = cv2.mean(img, mask=mask)[:3]
+    # return tuple(map(int, mean))
+
 
 
 
@@ -58,9 +69,11 @@ def ask_django_ocr(url , mode):
     # data = {'name': 'CJ'}
     response = requests.post(url)
 
+    print("Status code:", response.status_code)
+    # print("Response text:", response.text)
+
     data = response.json()
 
-    print(response.status_code)
 
     if len(data) == 0:
         print("탐지된 텍스트 없음! ")
@@ -70,7 +83,7 @@ def ask_django_ocr(url , mode):
     
 
     # 예시 데이터 구조
-    print( word_coords )
+    # print( word_coords )
 
     # [    {        'text': 'Hello',        'coords': [(100, 200), (150, 200), (150, 230), (100, 230)]    },
     #     {        'text': '안녕',        'coords': [(300, 400), (350, 400), (350, 430), (300, 430)]    }]
@@ -85,6 +98,7 @@ def ask_django_ocr(url , mode):
         box_l_top, box_r_top, box_r_bottom,  box_l_bottom = None, None, None, None
         color_l_top, color_r_top, color_r_bottom,  color_l_bottom = None, None, None, None
 
+        print('# detected words: ' + str( len(word_coords) ) )
         for item in word_coords:
             text = item['text']
 
@@ -95,6 +109,8 @@ def ask_django_ocr(url , mode):
                 box_r_top = item['coords'][1]
 
                 color_r_top = item['coords'][2]
+
+                # print(text)
 
 
             # elif re.fullmatch(r'[A-Za-z]+', text) and text in defined_colors:
@@ -108,6 +124,8 @@ def ask_django_ocr(url , mode):
                 color_l_top = item['coords'][1]
                 color_l_bottom = item['coords'][2]
                 color_r_bottom = (box_r_top[0], color_l_bottom[1])  # x좌표는 box_r_top과 같고, y좌표는 color_l_bottom과 같음
+
+                # print(text)
 
 
         box_r_bottom = color_r_bottom

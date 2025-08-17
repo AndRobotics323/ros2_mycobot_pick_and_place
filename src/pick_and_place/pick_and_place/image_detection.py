@@ -62,6 +62,7 @@ def _detect_april_tag(frame, camera_matrix, target_id=None):
         tag = tags[0]  # 첫 번째 태그 사용 (기존 방식)
 
     tvec = tag.pose_t * 1000  # meter → mm
+
     rvec, _ = cv2.Rodrigues(tag.pose_R)
 
     camera_coords = tvec.flatten().tolist()

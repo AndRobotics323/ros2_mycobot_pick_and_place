@@ -4,15 +4,14 @@ import time
 from flask import Flask, Response
 
 
-device_num = 0
-# device_num = '/dev/jetcocam0'
-
 
 class CameraManager:
-    def __init__(self, device=device_num, enable_streaming=True, flask_port=5000):
-        self.cap = cv2.VideoCapture(device)
+    def __init__(self, device_num, enable_streaming=True, flask_port=5000):
+        # self.cap = cv2.VideoCapture(device_num)
+        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # CAP_DSHOW 강제 지정
+
         if not self.cap.isOpened():
-            raise RuntimeError(f"카메라를 열 수 없습니다: {device}")
+            raise RuntimeError(f"카메라를 열 수 없습니다: {device_num}")
 
         self.latest_frame = None
         self.encoded_frame = None
@@ -88,3 +87,23 @@ class CameraManager:
         if hasattr(self, 'thread'):
             self.thread.join(timeout=1)
         self.cap.release()
+
+
+
+### ros2 run 안 하고 그냥 flask 만 열고싶을 때 python3 image_caputre.py 할 수 있도록
+
+if __name__ == '__main__':
+
+    device_num = 0
+    # device_num = '/dev/jetcocam0'
+
+    cam = CameraManager(device_num)
+
+    try:
+        print("스트리밍 중... Ctrl+C로 종료하세요.")
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("종료합니다.")
+    finally:
+        cam.release()
