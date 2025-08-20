@@ -7,8 +7,8 @@ from flask import Flask, Response
 
 class CameraManager:
     def __init__(self, device_num, enable_streaming=True, flask_port=5000):
-        # self.cap = cv2.VideoCapture(device_num)
-        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # CAP_DSHOW 강제 지정
+        self.cap = cv2.VideoCapture(device_num)
+        # self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # CAP_DSHOW 강제 지정
 
         if not self.cap.isOpened():
             raise RuntimeError(f"카메라를 열 수 없습니다: {device_num}")
@@ -94,8 +94,8 @@ class CameraManager:
 
 if __name__ == '__main__':
 
-    device_num = 0
-    # device_num = '/dev/jetcocam0'
+    # device_num = 0
+    device_num = '/dev/ttyJETCOBOT'
 
     cam = CameraManager(device_num)
 

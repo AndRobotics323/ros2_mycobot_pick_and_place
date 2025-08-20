@@ -9,14 +9,14 @@ from collections import Counter
 
 # CJ 192.168.0.189
 
+django_url = 'http://192.168.0.189:8000/gwanje/ocr_from_flask_stream/'
 # django_url = 'http://192.168.5.17:8000/gwanje/ocr_from_flask_stream/'
-django_url = 'https://robocallee.jp.ngrok.io/gwanje/ocr_from_flask_stream/'
+# django_url = 'https://robocallee.jp.ngrok.io/gwanje/ocr_from_flask_stream/'
 
 
 defined_models =['나이키', '아디다스', '뉴발란스', '반스', '컨버스','푸마']
 defined_colors =['white', 'black', 'red', 'blue', 'green', 'yellow', 'gray', 'brown', 'pink', 'purple']
 defined_sizes = ['230', '235', '240', '245', '250', '255', '260', '265', '270', '275', '280', '285', '290']
-
 
 
 def classify_color(bgr):
@@ -30,9 +30,9 @@ def classify_color(bgr):
         'white':  [(0, 0, 200), (180, 30, 255)],
         'gray':   [(0, 0, 51), (180, 30, 199)]
     }
-    hsv = cv2.cvtColor(np.uint8([[bgr]]), cv2.COLOR_BGR2HSV)[0][0]
+    hsv = cv2.cvtColor(np.uint8( [ [ bgr ] ] ), cv2.COLOR_BGR2HSV)[0][0]
     for color, (lower, upper) in color_ranges.items():
-        if all(lower[i] <= hsv[i] <= upper[i] for i in range(3)):
+        if all(lower[i] <= hsv[i] <= upper[i] for i in range(3) ):
             return color
     return 'unknown'
 
@@ -93,10 +93,11 @@ def ask_django_ocr(url , mode):
 
 
     elif mode == 'get_shoe_info':
-        tmp_dict = { 'model': '아직', 'color' : 'yet', 'size': -1, 'coords': [0,0,0,0]  }
+        tmp_dict = { 'model': '아직', 'color' : 'yet', 'size': -1, 'coords': [0.0, 0.0, 0.0, 0.0]  }
         
         box_l_top, box_r_top, box_r_bottom,  box_l_bottom = None, None, None, None
         color_l_top, color_r_top, color_r_bottom,  color_l_bottom = None, None, None, None
+        center_coord = None
 
         print('# detected words: ' + str( len(word_coords) ) )
         for item in word_coords:
@@ -123,10 +124,17 @@ def ask_django_ocr(url , mode):
 
                 color_l_top = item['coords'][1]
                 color_l_bottom = item['coords'][2]
-                color_r_bottom = (box_r_top[0], color_l_bottom[1])  # x좌표는 box_r_top과 같고, y좌표는 color_l_bottom과 같음
 
+                
                 # print(text)
 
+
+
+        # 정사각형 중점
+        center_coord = (    (box_l_bottom[0] + box_r_top[0]) / 2.0,  (box_l_bottom[1] + box_r_top[1]) / 2.0  )
+
+        # 오른쪽 아래
+        color_r_bottom = ( ( 2.0 * center_coord[0] - box_l_top[0] )  , ( 2.0 * center_coord[1] - box_l_top[1] ) ) 
 
         box_r_bottom = color_r_bottom
 

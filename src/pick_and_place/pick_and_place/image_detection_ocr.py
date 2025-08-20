@@ -6,24 +6,19 @@ import cv2
 import numpy as np
 
 # from pick_and_place.http_request import ask_django_ocr  # detect() 내부에서 _detect_april_tag 호출
-
 from http_request import ask_django_ocr  # detect() 내부에서 _detect_april_tag 호출
 
-
-# CJ 192.168.0.189
-
+django_url = 'http://192.168.0.189:8000/gwanje/ocr_from_flask_stream/'
 # django_url = 'http://192.168.5.17:8000/gwanje/ocr_from_flask_stream/'
-django_url = 'https://robocallee.jp.ngrok.io/gwanje/ocr_from_flask_stream/'
-
-
+# django_url = 'https://robocallee.ngrok.io/gwanje/ocr_from_flask_stream/'
  
+
 # === 카메라 내부 파라미터 설정 ===
 camera_matrix = np.array([[1018.8890899848071, 0., 372.64373648977255],
                           [0., 1016.7247236426332, 229.30521863962326],
                           [0., 0., 1.]], dtype=np.float32)
 dist_coeffs = np.array([-0.4664, 2.0392, 0.00035, -0.00077, -16.977], dtype=np.float64)
-tag_size = 0.04  # 단위: meter
-
+tag_size = 0.02  # 단위: meter
 
 
 # === Pose 계산 함수 ===
@@ -71,12 +66,6 @@ def _detect_ocr(frame, camera_matrix):
         
 
     return camera_coords, rvec_deg, tmp_dict['model'], tmp_dict['color'], tmp_dict['size']
-
-
-
-
-
-
 
 
 
